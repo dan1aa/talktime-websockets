@@ -1,21 +1,20 @@
-const { Server } = require('ws')
+const WebSocket = require('ws')
 const express = require('express')
 const cors = require('cors')
-const app = express()
+
+let app = express()
+
+app.use(express.json({ extended: false}));
+app.use(express.static('public'));
+
+const server = new WebSocket.Server({ server:app.listen(5000) });
 
 app.use(cors())
 
-const server = new Server({ port: 3000 })
-const WEBSOCKET_OPEN = 1
-
-app.listen(5000, () => {
-    console.log('Server started')
-})
-
-server.on('connection', ws => {
-    ws.on('message', data => {
-        server.clients.forEach(client => {
-            client.send(JSON.stringify(data))
-        })
+server.on('connection', (socket) => {
+    socket.on('message', (msg) => {
+      server.clients.forEach( client => {
+        client.send(JSON.stringify(msg));
+      })
     });
-});
+  });
